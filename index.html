@@ -44,72 +44,62 @@
     </style>
 </head>
 <body>
-
     <h2>共享文本编辑器</h2>
 
     <textarea id="textInput" rows="10" placeholder="输入要共享的文本..."></textarea>
-    <button id="saveButton">保存</button>
-    <button id="shareButton">生成共享链接</button>
-    <div id="shareLink"></div>
+    <button id="saveButton">保存并分享</button>
 
     <script>
         const textInput = document.getElementById('textInput');
         const saveButton = document.getElementById('saveButton');
-        const shareButton = document.getElementById('shareButton');
-        const shareLink = document.getElementById('shareLink');
+        const sharedId = 'test-cbv-shared-content'; // 固定的共享ID
 
-        // 加载保存的文本
-        const savedText = localStorage.getItem('sharedText');
-        if (savedText) {
-            textInput.value = savedText;
-        }
+        // 页面加载时获取共享内容
+        window.addEventListener('load', () => {
+            fetchSharedContent();
+        });
 
-        // 从 URL 参数加载共享的文本
-        const urlParams = new URLSearchParams(window.location.search);
-        const sharedId = urlParams.get('id');
-        if (sharedId) {
+        // 获取共享内容
+        function fetchSharedContent() {
             fetch(`https://sharedtextstorage.suoliweng2099.workers.dev/${sharedId}`)
                 .then(response => response.text())
                 .then(text => {
-                    textInput.value = text;
-                    localStorage.setItem('sharedText', text);
+                    if (text && text !== 'Not found') {
+                        textInput.value = text;
+                    }
                 })
                 .catch(error => console.error('Error:', error));
         }
 
         // 自动保存功能
+        let saveTimeout;
         textInput.addEventListener('input', () => {
-            localStorage.setItem('sharedText', textInput.value);
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(saveContent, 1000); // 1秒后自动保存
         });
 
-        // 手动保存按钮
-        saveButton.addEventListener('click', () => {
-            localStorage.setItem('sharedText', textInput.value);
-            alert('文本已保存');
-        });
+        // 保存按钮
+        saveButton.addEventListener('click', saveContent);
 
-        // 生成共享链接
-        shareButton.addEventListener('click', async () => {
+        // 保存内容
+        function saveContent() {
             const text = textInput.value;
-            if (!text) {
-                alert('请先输入要共享的文本');
-                return;
-            }
-
-            try {
-                const response = await fetch('https://sharedtextstorage.suoliweng2099.workers.dev/', {
-                    method: 'POST',
-                    body: text,
-                });
-                const id = await response.text();
-                const shareUrl = `https://test-cbv.pages.dev/?id=${id}`;
-                shareLink.innerHTML = `共享链接: <a href="${shareUrl}" target="_blank">${shareUrl}</a>`;
-            } catch (error) {
-                console.error('Error:', error);
-                alert('生成共享链接时出错');
-            }
-        });
+            fetch('https://sharedtextstorage.suoliweng2099.workers.dev/', {
+                method: 'POST',
+                body: JSON.stringify({ id: sharedId, content: text }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.text())
+            .then(() => {
+                console.log('内容已保存');
+            })
+            .catch(error => {
+                console.error('保存时出错:', error);
+                alert('保存失败，请稍后重试');
+            });
+        }
     </script>
-
 </body>
 </html>
