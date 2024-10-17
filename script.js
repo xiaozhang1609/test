@@ -4,17 +4,11 @@ const saveButton = document.getElementById('saveButton');
 // 从 Gist 加载文本
 async function loadText() {
     try {
-        const response = await fetch(`https://api.github.com/gists/${window.ENV.GIST_ID}`, {
-            headers: {
-                'Authorization': `token ${window.ENV.GITHUB_TOKEN}`,
-                'Accept': 'application/vnd.github.v3+json'
-            }
-        });
+        const response = await fetch('/api/text');
         if (!response.ok) {
             throw new Error('Failed to load text');
         }
-        const data = await response.json();
-        editor.value = data.files['shared-text.txt'].content;
+        editor.value = await response.text();
     } catch (error) {
         console.error('Error loading text:', error);
     }
@@ -23,20 +17,9 @@ async function loadText() {
 // 保存文本到 Gist
 async function saveText() {
     try {
-        const response = await fetch(`https://api.github.com/gists/${window.ENV.GIST_ID}`, {
-            method: 'PATCH',
-            headers: {
-                'Authorization': `token ${window.ENV.GITHUB_TOKEN}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/vnd.github.v3+json'
-            },
-            body: JSON.stringify({
-                files: {
-                    'shared-text.txt': {
-                        content: editor.value
-                    }
-                }
-            })
+        const response = await fetch('/api/text', {
+            method: 'POST',
+            body: editor.value
         });
         if (!response.ok) {
             throw new Error('Failed to save text');
