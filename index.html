@@ -27,59 +27,35 @@
 
     <script>
         const textInput = document.getElementById('textInput');
-        const sharedId = 'test-cbv-shared-content'; // 固定的共享ID
-
-        // 页面加载时获取共享内容
-        window.addEventListener('load', fetchSharedContent);
+        const workerUrl = 'https://shared-text-editor.suoliweng2099.workers.dev'; // 替换为您的 Worker URL
 
         // 获取共享内容
-        function fetchSharedContent() {
-            fetch(`https://sharedtextstorage.suoliweng2099.workers.dev/${sharedId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.text();
-                })
-                .then(text => {
-                    if (text && text !== 'Not found') {
-                        textInput.value = text;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching shared content:', error);
-                });
-        }
+        fetch(workerUrl)
+            .then(response => response.text())
+            .then(text => {
+                if (text) {
+                    textInput.value = text;
+                }
+            })
+            .catch(error => console.error('Error fetching content:', error));
 
         // 自动保存功能
         let saveTimeout;
         textInput.addEventListener('input', () => {
             clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(saveContent, 1000); // 1秒后自动保存
+            saveTimeout = setTimeout(saveContent, 1000);
         });
 
         // 保存内容
         function saveContent() {
             const text = textInput.value;
-            fetch('https://sharedtextstorage.suoliweng2099.workers.dev/', {
+            fetch(workerUrl, {
                 method: 'POST',
-                body: JSON.stringify({ id: sharedId, content: text }),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+                body: text
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.text();
-            })
-            .then(() => {
-                console.log('内容已自动保存');
-            })
-            .catch(error => {
-                console.error('自动保存失败:', error);
-            });
+            .then(response => response.text())
+            .then(() => console.log('Content saved'))
+            .catch(error => console.error('Save error:', error));
         }
     </script>
 </body>
