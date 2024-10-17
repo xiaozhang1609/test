@@ -1,25 +1,36 @@
 const editor = document.getElementById('editor');
 const saveButton = document.getElementById('saveButton');
 
-// 从 Worker 加载文本
+// 从 Gist 加载文本
 async function loadText() {
     try {
-        const response = await fetch('/api/load');
+        const response = await fetch(`https://api.github.com/gists/${GIST_ID}`);
         if (!response.ok) {
             throw new Error('Failed to load text');
         }
-        editor.value = await response.text();
+        const data = await response.json();
+        editor.value = data.files['shared-text.txt'].content;
     } catch (error) {
         console.error('Error loading text:', error);
     }
 }
 
-// 保存文本到 Worker
+// 保存文本到 Gist
 async function saveText() {
     try {
-        const response = await fetch('/api/save', {
-            method: 'POST',
-            body: editor.value
+        const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                files: {
+                    'shared-text.txt': {
+                        content: editor.value
+                    }
+                }
+            })
         });
         if (!response.ok) {
             throw new Error('Failed to save text');
