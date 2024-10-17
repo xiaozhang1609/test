@@ -15,8 +15,8 @@
     <button id="saveButton">Save</button>
     <script>
         window.ENV = {
-            GIST_ID: '{{ GIST_ID }}',
-            GITHUB_TOKEN: '{{ GITHUB_TOKEN }}'
+            GIST_ID: '',
+            GITHUB_TOKEN: ''
         };
         // 使用 Cloudflare Pages 环境变量
         if (typeof GIST_ID !== 'undefined') window.ENV.GIST_ID = GIST_ID;
