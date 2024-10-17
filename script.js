@@ -4,7 +4,12 @@ const saveButton = document.getElementById('saveButton');
 // 从 Gist 加载文本
 async function loadText() {
     try {
-        const response = await fetch(`https://api.github.com/gists/${GIST_ID}`);
+        const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+            headers: {
+                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
         if (!response.ok) {
             throw new Error('Failed to load text');
         }
@@ -22,7 +27,8 @@ async function saveText() {
             method: 'PATCH',
             headers: {
                 'Authorization': `token ${GITHUB_TOKEN}`,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/vnd.github.v3+json'
             },
             body: JSON.stringify({
                 files: {
