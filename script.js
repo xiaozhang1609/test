@@ -4,9 +4,9 @@ const saveButton = document.getElementById('saveButton');
 // 从 Gist 加载文本
 async function loadText() {
     try {
-        const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+        const response = await fetch(`https://api.github.com/gists/${window.ENV.GIST_ID}`, {
             headers: {
-                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Authorization': `token ${window.ENV.GITHUB_TOKEN}`,
                 'Accept': 'application/vnd.github.v3+json'
             }
         });
@@ -23,10 +23,10 @@ async function loadText() {
 // 保存文本到 Gist
 async function saveText() {
     try {
-        const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+        const response = await fetch(`https://api.github.com/gists/${window.ENV.GIST_ID}`, {
             method: 'PATCH',
             headers: {
-                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Authorization': `token ${window.ENV.GITHUB_TOKEN}`,
                 'Content-Type': 'application/json',
                 'Accept': 'application/vnd.github.v3+json'
             },

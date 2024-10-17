@@ -14,9 +14,13 @@
     <textarea id="editor"></textarea>
     <button id="saveButton">Save</button>
     <script>
-        // Cloudflare Pages will automatically replace these with the actual environment variable values
-        const GIST_ID = '{{ GIST_ID }}';
-        const GITHUB_TOKEN = '{{ GITHUB_TOKEN }}';
+        window.ENV = {
+            GIST_ID: '{{ GIST_ID }}',
+            GITHUB_TOKEN: '{{ GITHUB_TOKEN }}'
+        };
+        // 使用 Cloudflare Pages 环境变量
+        if (typeof GIST_ID !== 'undefined') window.ENV.GIST_ID = GIST_ID;
+        if (typeof GITHUB_TOKEN !== 'undefined') window.ENV.GITHUB_TOKEN = GITHUB_TOKEN;
     </script>
     <script src="script.js"></script>
 </body>
