@@ -5,70 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>共享文本编辑器</title>
     <style>
-        body {
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
             font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            max-width: 500px;
         }
-        input[type="text"], textarea {
+        #textInput {
             width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            padding: 10px 15px;
-            background-color: #007bff;
-            color: white;
+            height: 100%;
             border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .result {
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        #shareLink {
-            margin-top: 10px;
-            word-break: break-all;
+            padding: 20px;
+            box-sizing: border-box;
+            font-size: 16px;
+            resize: none;
         }
     </style>
 </head>
 <body>
-    <h2>共享文本编辑器</h2>
-
-    <textarea id="textInput" rows="10" placeholder="输入要共享的文本..."></textarea>
-    <button id="saveButton">保存并分享</button>
+    <textarea id="textInput" placeholder="开始输入..."></textarea>
 
     <script>
         const textInput = document.getElementById('textInput');
-        const saveButton = document.getElementById('saveButton');
         const sharedId = 'test-cbv-shared-content'; // 固定的共享ID
 
         // 页面加载时获取共享内容
-        window.addEventListener('load', () => {
-            fetchSharedContent();
-        });
+        window.addEventListener('load', fetchSharedContent);
 
         // 获取共享内容
         function fetchSharedContent() {
             fetch(`https://sharedtextstorage.suoliweng2099.workers.dev/${sharedId}`)
-                .then(response => response.text())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
                 .then(text => {
                     if (text && text !== 'Not found') {
                         textInput.value = text;
                     }
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    console.error('Error fetching shared content:', error);
+                });
         }
 
         // 自动保存功能
@@ -77,9 +57,6 @@
             clearTimeout(saveTimeout);
             saveTimeout = setTimeout(saveContent, 1000); // 1秒后自动保存
         });
-
-        // 保存按钮
-        saveButton.addEventListener('click', saveContent);
 
         // 保存内容
         function saveContent() {
@@ -91,13 +68,17 @@
                     'Content-Type': 'application/json'
                 }
             })
-            .then(response => response.text())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text();
+            })
             .then(() => {
-                console.log('内容已保存');
+                console.log('内容已自动保存');
             })
             .catch(error => {
-                console.error('保存时出错:', error);
-                alert('保存失败，请稍后重试');
+                console.error('自动保存失败:', error);
             });
         }
     </script>
