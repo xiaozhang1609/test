@@ -9,7 +9,7 @@
     <button onclick="saveText()">Save</button>
     <script>
         const editor = document.getElementById('editor');
-        const workerUrl = 'https://shared-text-editor.suoliweng2099.workers.dev';
+        const workerUrl = 'https://shared-text-editor.your-subdomain.workers.dev';
 
         async function loadText() {
             editor.value = await fetch(workerUrl).then(r => r.text());
