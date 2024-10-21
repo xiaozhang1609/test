@@ -1,62 +1,151 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="h-full bg-gray-100">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>共享文本编辑器</title>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>在线工具箱</title>
     <style>
-        body, html {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
+        :root {
+            --primary-color: #4A90E2;
+            --primary-dark: #3A7BC8;
+            --text-color: #333333;
+            --bg-color: #F0F4F8;
+            --sidebar-width: 280px;
+            --transition-speed: 0.3s;
         }
-        #textInput {
-            width: 100%;
-            height: 100%;
-            border: none;
-            padding: 20px;
-            box-sizing: border-box;
-            font-size: 16px;
-            resize: none;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .nav-group {
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        .nav-group:last-child {
+            border-bottom: none;
+        }
+        .nav-group-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.75rem 1.25rem;
+        }
+        .nav-item {
+            font-size: 1rem;
+            color: #475569;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            transition: all var(--transition-speed) ease-in-out;
+            display: flex;
+            align-items: center;
+        }
+        .nav-item:hover {
+            background-color: #e2e8f0;
+            color: var(--primary-color);
+        }
+        .nav-item.active {
+            background-color: #e2e8f0;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        .nav-item-icon {
+            margin-right: 0.75rem;
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+        .sidebar-toggle {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 40;
+            padding: 0.75rem;
+            background-color: white;
+            color: var(--primary-color);
+            border-radius: 50%;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all var(--transition-speed) ease-in-out;
+        }
+        .sidebar-toggle:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        @media (min-width: 1024px) {
+            .sidebar-toggle {
+                display: none;
+            }
         }
     </style>
+  <script type="module" crossorigin src="./assets/main-Cj2LE5La.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/style-8yl8s4Iy.css">
 </head>
-<body>
-    <textarea id="textInput" placeholder="开始输入..."></textarea>
+<body class="h-full p-4 sm:p-6">
+    <div class="flex h-[calc(100vh-2rem)] sm:h-[calc(100vh-3rem)] gap-6">
+        <!-- 侧边栏容器 -->
+        <div class="w-[var(--sidebar-width)] hidden lg:block">
+            <nav id="sidebar" class="bg-white shadow-xl flex flex-col h-full rounded-2xl overflow-hidden">
+                <div class="gradient-bg text-white h-20 flex items-center justify-center">
+                    <a href="/" class="text-2xl font-bold cursor-pointer transition-all hover:text-3xl">
+                        在线工具箱
+                    </a>
+                </div>
+                <div class="flex-grow overflow-y-auto hide-scrollbar">
+                    <ul id="toolList" class="space-y-1 p-4">
+                        <!-- 工具列表将通过 JavaScript 动态填充 -->
+                    </ul>
+                </div>
+            </nav>
+        </div>
 
-    <script>
-        const textInput = document.getElementById('textInput');
-        const workerUrl = 'https://shared-text-editor.suoliweng2099.workers.dev'; // 替换为您的 Worker URL
+        <!-- 主内容区域容器 -->
+        <div class="flex-1 bg-white rounded-2xl shadow-xl overflow-hidden">
+            <main class="h-full p-6">
+                <iframe id="toolFrame" class="w-full h-full border-none rounded-xl" src="about:blank" title="选中的工具内容" loading="lazy"></iframe>
+            </main>
+        </div>
+    </div>
 
-        // 获取共享内容
-        fetch(workerUrl)
-            .then(response => response.text())
-            .then(text => {
-                if (text) {
-                    textInput.value = text;
-                }
-            })
-            .catch(error => console.error('Error fetching content:', error));
+    <!-- 移动端侧边栏 -->
+    <div id="mobileSidebar" class="fixed inset-0 bg-gray-600 bg-opacity-75 z-50 lg:hidden" style="display: none;">
+        <div class="fixed inset-y-0 left-0 w-[var(--sidebar-width)] bg-white shadow-2xl">
+            <nav class="flex flex-col h-full">
+                <div class="gradient-bg text-white h-20 flex items-center justify-between px-6">
+                    <a href="/" class="text-2xl font-bold">在线工具箱</a>
+                    <button id="closeMobileSidebar" class="text-white focus:outline-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="flex-grow overflow-y-auto hide-scrollbar">
+                    <ul id="mobileToolList" class="space-y-1 p-4">
+                        <!-- 移动端工具列表将通过 JavaScript 动态填充 -->
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    </div>
 
-        // 自动保存功能
-        let saveTimeout;
-        textInput.addEventListener('input', () => {
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(saveContent, 1000);
-        });
+    <!-- 移动端侧边栏切换按钮 -->
+    <button id="openMobileSidebar" class="sidebar-toggle" aria-label="打开侧边栏">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
 
-        // 保存内容
-        function saveContent() {
-            const text = textInput.value;
-            fetch(workerUrl, {
-                method: 'POST',
-                body: text
-            })
-            .then(response => response.text())
-            .then(() => console.log('Content saved'))
-            .catch(error => console.error('Save error:', error));
-        }
-    </script>
 </body>
 </html>

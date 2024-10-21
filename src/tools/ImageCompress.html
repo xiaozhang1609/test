@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="多格式批量图片压缩工具，支持JPG、JPEG、PNG、WebP、GIF、AVIF、JXL和QOI格式">
+    <title>多格式批量图片压缩工具</title>
+    <style>
+        .custom-height {
+            height: calc(100vh - 2rem);
+            min-height: 480px;
+        }
+        .table-container {
+            max-height: calc(100% - 12rem);
+            overflow-y: auto;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+  <link rel="stylesheet" crossorigin href="../../assets/style-8yl8s4Iy.css">
+</head>
+<body class="h-full bg-gray-100 flex items-center justify-center p-4">
+    <div class="container mx-auto bg-white rounded-xl shadow-lg max-w-6xl p-4 custom-height flex flex-col">
+        <h1 class="text-2xl md:text-3xl font-bold text-center text-blue-600 mb-2">多格式批量图片压缩工具</h1>
+        
+        <p class="text-center text-gray-600 mb-4">支持JPG、JPEG、PNG、WebP、GIF、AVIF、JXL和QOI格式的批量压缩，快速减小图片文件大小。</p>
+
+        <div class="flex-grow flex flex-col space-y-4">
+            <div id="uploadArea" class="border-2 border-dashed border-blue-400 rounded-xl p-4 text-center bg-blue-50 cursor-pointer hover:bg-blue-100 transition duration-300">
+                <svg class="mx-auto h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                </svg>
+                <p class="mt-2 text-sm text-gray-600">拖放图片到此处或点击上传</p>
+                <p class="mt-1 text-xs text-gray-500">支持格式：JPG、JPEG、PNG、WebP、GIF、AVIF、JXL、QOI</p>
+                <input type="file" id="fileInput" accept="image/*" multiple class="hidden">
+            </div>
+
+            <div class="flex justify-center space-x-4">
+                <button id="compressBtn" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-300 flex items-center text-sm">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    开始压缩
+                </button>
+                <button id="downloadAllBtn" class="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition duration-300 flex items-center text-sm hidden">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    下载所有（ZIP）
+                </button>
+            </div>
+
+            <div id="loadingMessage" class="hidden text-center text-blue-500 font-bold text-sm">
+                <svg class="animate-spin h-4 w-4 mr-2 inline-block" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                压缩中，请稍候...
+            </div>
+            <div id="statusMessage" class="text-center font-bold text-sm"></div>
+
+            <div class="table-container">
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 sticky top-0">
+                        <tr>
+                            <th scope="col" class="px-4 py-2">文件名</th>
+                            <th scope="col" class="px-4 py-2">原始大小</th>
+                            <th scope="col" class="px-4 py-2">压缩后大小</th>
+                            <th scope="col" class="px-4 py-2">压缩率</th>
+                            <th scope="col" class="px-4 py-2">状态</th>
+                        </tr>
+                    </thead>
+                    <tbody id="imageComparisonTable">
+                        <!-- Table rows will be dynamically inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const imageComparisonTable = document.getElementById('imageComparisonTable');
+            const compressBtn = document.getElementById('compressBtn');
+            const statusMessage = document.getElementById('statusMessage');
+            const loadingMessage = document.getElementById('loadingMessage');
+            const downloadAllBtn = document.getElementById('downloadAllBtn');
+            let files = [];
+            let compressedFiles = [];
+            let imageCompressionModule = null;
+
+            const supportedFormats = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif', 'image/jxl', 'image/qoi'];
+
+            uploadArea.addEventListener('click', () => fileInput.click());
+
+            ['dragover', 'dragleave', 'drop'].forEach(event => {
+                uploadArea.addEventListener(event, handleDragEvents);
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length) {
+                    handleFiles(e.target.files);
+                }
+            });
+
+            function handleDragEvents(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                uploadArea.classList.toggle('bg-blue-100', e.type === 'dragover');
+                if (e.type === 'drop' && e.dataTransfer.files.length) {
+                    handleFiles(e.dataTransfer.files);
+                }
+            }
+
+            function handleFiles(newFiles) {
+                const validFiles = Array.from(newFiles).filter(file => supportedFormats.includes(file.type));
+                if (validFiles.length === 0) {
+                    showStatus('请上传支持的图片格式！', 'error');
+                    return;
+                }
+                files = [...files, ...validFiles];
+                displayFileList();
+                showStatus('', 'normal');
+            }
+
+            function displayFileList() {
+                imageComparisonTable.innerHTML = files.map((file, index) => `
+                    <tr class="bg-white border-b">
+                        <td class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap">${file.name}</td>
+                        <td class="px-4 py-2">${(file.size / 1024).toFixed(2)} KB</td>
+                        <td class="px-4 py-2">-</td>
+                        <td class="px-4 py-2">-</td>
+                        <td class="px-4 py-2">
+                            <button class="remove-file text-red-500 hover:text-red-700" data-index="${index}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                document.querySelectorAll('.remove-file').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const index = parseInt(e.currentTarget.dataset.index);
+                        files.splice(index, 1);
+                        displayFileList();
+                    });
+                });
+            }
+
+            compressBtn.addEventListener('click', async () => {
+                if (files.length === 0) {
+                    showStatus('请上传至少一张图片！', 'error');
+                    return;
+                }
+                showStatus('', 'normal');
+                loadingMessage.classList.remove('hidden');
+                imageComparisonTable.innerHTML = '';
+                compressedFiles = [];
+
+                try {
+                    // 懒加载 image-compression 模块
+                    if (!imageCompressionModule) {
+                        imageCompressionModule = await import('https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.0/dist/browser-image-compression.mjs');
+                    }
+
+                    const results = await Promise.all(files.map(file => compressImage(file)));
+                    imageComparisonTable.innerHTML = results.map(({ blob, originalSize, compressedSize, compressionRate, name, status }) => {
+                        if (status === 'success') {
+                            compressedFiles.push({ blob, name });
+                        }
+                        return `
+                            <tr class="bg-white border-b">
+                                <td class="px-4 py-2 font-medium text-gray-900 whitespace-nowrap">${name}</td>
+                                <td class="px-4 py-2">${originalSize} KB</td>
+                                <td class="px-4 py-2">${compressedSize} KB</td>
+                                <td class="px-4 py-2">${compressionRate}%</td>
+                                <td class="px-4 py-2">
+                                    <span class="${status === 'success' ? 'text-green-500' : 'text-red-500'}">${status === 'success' ? '已压缩' : '压缩失败'}</span>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                    if (compressedFiles.length > 0) {
+                        downloadAllBtn.classList.remove('hidden');
+                    }
+                    showStatus('压缩完成！', 'success');
+                } catch (error) {
+                    showStatus(`压缩过程中出现错误：${error.message}`, 'error');
+                    console.error('压缩过程中出现错误:', error);
+                } finally {
+                    loadingMessage.classList.add('hidden');
+                }
+            });
+
+            async function compressImage(file) {
+                const originalSize = (file.size / 1024).toFixed(2);
+                const options = {
+                    maxSizeMB: 1,
+                    maxWidthOrHeight: 1920,
+                    useWebWorker: true,
+                    fileType: file.type,
+                };
+
+                try {
+                    // 首先检查文件是否可以被浏览器识别为图片
+                    await new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.onload = resolve;
+                        img.onerror = reject;
+                        img.src = URL.createObjectURL(file);
+                    });
+
+                    const compressedFile = await imageCompressionModule.default(file, options);
+                    const compressedSize = (compressedFile.size / 1024).toFixed(2);
+                    const compressionRate = ((1 - (compressedFile.size / file.size)) * 100).toFixed(2);
+                    return {
+                        blob: compressedFile,
+                        originalSize,
+                        compressedSize,
+                        compressionRate,
+                        name: file.name,
+                        status: 'success'
+                    };
+                } catch (error) {
+                    console.error(`图片 ${file.name} 压缩失败:`, error);
+                    return {
+                        blob: null,
+                        originalSize,
+                        compressedSize: '-',
+                        compressionRate: '-',
+                        name: file.name,
+                        status: 'error'
+                    };
+                }
+            }
+
+            downloadAllBtn.addEventListener('click', async () => {
+                try {
+                    const zip = new JSZip();
+                    compressedFiles.forEach(({ blob, name }) => {
+                        zip.file(name, blob);
+                    });
+                    const content = await zip.generateAsync({ type: 'blob' }, (metadata) => {
+                        const percent = metadata.percent.toFixed(2);
+                        showStatus(`正在生成 ZIP 文件: ${percent}%`, 'info');
+                    });
+                    const downloadURL = URL.createObjectURL(content);
+                    const link = document.createElement('a');
+                    link.href = downloadURL;
+                    link.download = 'compressed_images.zip';
+                    link.click();
+                    URL.revokeObjectURL(downloadURL);
+                    showStatus('ZIP 文件下载已开始', 'success');
+                } catch (error) {
+                    console.error('ZIP 文件创建失败', error);
+                    showStatus('ZIP 文件创建失败，请重试！', 'error');
+                }
+            });
+
+            function showStatus(message, type) {
+                statusMessage.textContent = message;
+                statusMessage.className = 'text-center font-bold text-sm';
+                if (type === 'error') {
+                    statusMessage.classList.add('text-red-500');
+                } else if (type === 'success') {
+                    statusMessage.classList.add('text-green-500');
+                } else if (type === 'info') {
+                    statusMessage.classList.add('text-blue-500');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

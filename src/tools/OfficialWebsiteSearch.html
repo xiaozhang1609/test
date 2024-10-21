@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>官网查询</title>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #EBF8FF, #E6FFFA);
+        }
+        .custom-shadow {
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.1), 0 10px 10px -5px rgba(59, 130, 246, 0.04);
+        }
+    </style>
+  <link rel="stylesheet" crossorigin href="../../assets/style-8yl8s4Iy.css">
+</head>
+<body class="h-full gradient-bg flex items-center justify-center p-4 font-sans">
+    <div class="bg-white rounded-3xl custom-shadow w-full max-w-2xl p-6 md:p-10 space-y-6 md:space-y-10">
+        <div class="text-center space-y-2 md:space-y-4">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-blue-600 tracking-tight">官网查询</h1>
+            <p class="text-lg md:text-xl text-gray-600">快速找到官方网站，避免下载盗版软件</p>
+        </div>
+        
+        <div class="space-y-6 md:space-y-8">
+            <div class="flex rounded-xl overflow-hidden shadow-lg">
+                <button id="softwareBtn" class="flex-1 py-3 md:py-4 px-4 md:px-6 text-base md:text-lg font-medium transition duration-300 ease-in-out focus:outline-none bg-blue-500 text-white hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50">
+                    软件查询
+                </button>
+                <button id="otherBtn" class="flex-1 py-3 md:py-4 px-4 md:px-6 text-base md:text-lg font-medium transition duration-300 ease-in-out focus:outline-none bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50">
+                    其他查询
+                </button>
+            </div>
+            <div class="relative">
+                <input type="text" id="searchName" placeholder="输入搜索内容" class="w-full p-4 md:p-6 text-lg md:text-xl bg-blue-50 border-2 border-blue-200 rounded-xl focus:ring-4 focus:ring-blue-300 focus:border-blue-300 transition duration-300 ease-in-out placeholder-gray-400">
+                <button id="searchButton" class="absolute right-3 md:right-4 top-1/2 transform -translate-y-1/2 bg-blue-500 text-white p-2 md:p-3 rounded-xl hover:bg-blue-600 transition duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-8 md:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSearchType = 'software';
+
+        function generateSearchQuery(searchName, searchType) {
+            const commonPositiveTerms = ['官方网站', '官网', '官方'];
+            let positiveTerms = [...commonPositiveTerms];
+            let negativeTerms = [];
+
+            if (searchType === 'software') {
+                positiveTerms.push('正版', '下载', '官方下载');
+                negativeTerms = ['破解版', '免费版', '破解', '绿色版', '激活码', '注册机', '盗版'];
+            }
+
+            let query = `"${searchName}" ${positiveTerms.join(' ')}`;
+            if (searchType === 'software') {
+                negativeTerms.forEach(term => {
+                    query += ` -${term}`;
+                });
+            }
+            
+            return query;
+        }
+
+        function updateButtonStyles() {
+            const softwareBtn = document.getElementById('softwareBtn');
+            const otherBtn = document.getElementById('otherBtn');
+
+            if (currentSearchType === 'software') {
+                softwareBtn.classList.remove('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+                softwareBtn.classList.add('bg-blue-500', 'text-white', 'hover:bg-blue-600');
+                otherBtn.classList.remove('bg-blue-500', 'text-white', 'hover:bg-blue-600');
+                otherBtn.classList.add('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+            } else {
+                otherBtn.classList.remove('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+                otherBtn.classList.add('bg-blue-500', 'text-white', 'hover:bg-blue-600');
+                softwareBtn.classList.remove('bg-blue-500', 'text-white', 'hover:bg-blue-600');
+                softwareBtn.classList.add('bg-gray-100', 'text-gray-700', 'hover:bg-gray-200');
+            }
+        }
+
+        function performSearch() {
+            const searchName = document.getElementById('searchName').value.trim();
+            if (searchName) {
+                const searchQuery = generateSearchQuery(searchName, currentSearchType);
+                const searchUrl = `https://cn.bing.com/search?q=${encodeURIComponent(searchQuery)}`;
+                window.open(searchUrl, '_blank');
+            } else {
+                alert('请输入搜索内容');
+            }
+        }
+
+        document.getElementById('softwareBtn').addEventListener('click', function() {
+            currentSearchType = 'software';
+            updateButtonStyles();
+        });
+
+        document.getElementById('otherBtn').addEventListener('click', function() {
+            currentSearchType = 'other';
+            updateButtonStyles();
+        });
+
+        document.getElementById('searchButton').addEventListener('click', performSearch);
+
+        document.getElementById('searchName').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        // 懒加载初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateButtonStyles();
+        });
+    </script>
+</body>
+</html>
