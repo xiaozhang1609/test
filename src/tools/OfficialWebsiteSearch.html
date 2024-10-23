@@ -1,134 +1,54 @@
 <!DOCTYPE html>
 <html lang="zh-CN" class="h-full">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>官网查询</title>
-    <link rel="preconnect" href="https://cn.bing.com">
-    <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #EBF8FF, #E6FFFA)
-        }
-
-        /* 内联关键 CSS */
-        .h-full {
-            height: 100%
-        }
-
-        .flex {
-            display: flex
-        }
-
-        .items-center {
-            align-items: center
-        }
-
-        .justify-center {
-            justify-content: center
-        }
-
-        .bg-white {
-            background-color: #fff
-        }
-
-        .rounded-3xl {
-            border-radius: 1.5rem
-        }
-
-        .w-full {
-            width: 100%
-        }
-
-        .max-w-2xl {
-            max-width: 42rem
-        }
-
-        .p-4 {
-            padding: 1rem
-        }
-
-        .p-6 {
-            padding: 1.5rem
-        }
-
-        .space-y-6 {
-            margin-top: 1.5rem
-        }
-
-        .text-center {
-            text-align: center
-        }
-
-        .text-4xl {
-            font-size: 2.25rem
-        }
-
-        .font-extrabold {
-            font-weight: 800
-        }
-
-        .text-blue-600 {
-            color: #2563eb
-        }
-
-        .text-lg {
-            font-size: 1.125rem
-        }
-
-        .text-gray-600 {
-            color: #4b5563
-        }
-
-        .relative {
-            position: relative
-        }
-    </style>
-    <link rel="stylesheet" href="data:text/css;base64,QHRhaWx3aW5kIGJhc2U7DQpAdGFpbHdpbmQgY29tcG9uZW50czsNCkB0YWlsd2luZCB1dGlsaXRpZXM7" media="print" onload="this.media='all'">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-
-<body class="h-full gradient-bg flex items-center justify-center p-4 font-sans">
-    <div class="bg-white rounded-3xl w-full max-w-2xl p-6 md:p-10 space-y-6 md:space-y-10 shadow-lg">
-        <div class="text-center space-y-2 md:space-y-4">
-            <h1 class="text-4xl md:text-5xl font-extrabold text-blue-600 tracking-tight">官网查询</h1>
-            <p class="text-lg md:text-xl text-gray-600">快速找到官方网站，避免下载盗版软件</p>
+<body class="h-full bg-gradient-to-br from-blue-50 to-teal-50 flex items-center justify-center p-4 font-sans">
+    <div class="bg-white rounded-3xl w-full max-w-2xl p-8 shadow-2xl space-y-8">
+        <div class="text-center space-y-4">
+            <h1 class="text-5xl font-extrabold text-blue-600 tracking-tight">官网查询</h1>
+            <p class="text-xl text-gray-600">快速找到官方网站，避免下载盗版软件</p>
         </div>
-        <div class="space-y-6 md:space-y-8">
-            <div class="relative">
-                <input type="text" id="searchName" placeholder="输入软件名称"
-                    class="w-full p-4 md:p-6 text-lg md:text-xl bg-blue-50 border-2 border-blue-200 rounded-xl focus:ring-4 focus:ring-blue-300 focus:border-blue-300 transition duration-300 ease-in-out placeholder-gray-400">
-                <button id="searchButton"
-                    class="absolute right-3 md:right-4 top-1/2 transform -translate-y-1/2 bg-blue-500 text-white p-2 md:p-3 rounded-xl hover:bg-blue-600 transition duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-50">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-8 md:w-8" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </button>
-            </div>
+        <div class="relative">
+            <input type="text" id="searchName" placeholder="输入软件名称"
+                class="w-full p-4 text-xl bg-gray-50 border-2 border-blue-200 rounded-xl focus:ring-4 focus:ring-blue-300 focus:border-blue-300 transition duration-300 ease-in-out placeholder-gray-400">
+            <button id="searchButton"
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 bg-blue-500 text-white p-3 rounded-xl hover:bg-blue-600 transition duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-blue-300 focus:ring-opacity-50">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </button>
         </div>
     </div>
-    <script async>
-        function generateSearchQuery(e) {
-            const r = ["官方网站", "官网", "官方", "正版", "下载", "官方下载"];
-            const o = ["破解版", "免费版", "破解", "绿色版", "激活码", "注册机", "盗版"];
-            return `"${e}" ${r.join(" ")}${o.map(e => " -" + e).join("")}`;
+
+    <script>
+        function generateSearchQuery(softwareName) {
+            const positiveKeywords = ["官方网站", "官网", "官方", "正版", "下载", "官方下载"];
+            const negativeKeywords = ["破解版", "免费版", "破解", "绿色版", "激活码", "注册机", "盗版"];
+            return `"${softwareName}" ${positiveKeywords.join(" ")}${negativeKeywords.map(kw => " -" + kw).join("")}`;
         }
 
         function performSearch() {
-            const e = document.getElementById("searchName").value.trim();
-            if (e) {
-                const t = generateSearchQuery(e),
-                    r = `https://cn.bing.com/search?q=${encodeURIComponent(t)}`;
-                window.open(r, "_blank")
-            } else alert("请输入软件名称")
+            const searchName = document.getElementById("searchName").value.trim();
+            if (searchName) {
+                const query = generateSearchQuery(searchName);
+                const searchUrl = `https://cn.bing.com/search?q=${encodeURIComponent(query)}`;
+                window.open(searchUrl, "_blank");
+            } else {
+                alert("请输入软件名称");
+            }
         }
 
         document.getElementById("searchButton").addEventListener("click", performSearch);
-        document.getElementById("searchName").addEventListener("keypress", function (e) {
-            "Enter" === e.key && performSearch()
+        document.getElementById("searchName").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                performSearch();
+            }
         });
     </script>
 </body>
-
 </html>
