@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高级图片格式转换器</title>
+  <link rel="stylesheet" crossorigin href="../../assets/style-DaBjXPXN.css">
+</head>
+<body class="h-full bg-gray-50 flex flex-col justify-center items-center font-sans text-gray-800">
+    <div class="container mx-auto px-4 py-8 bg-white rounded-lg shadow-lg max-w-5xl">
+        <h1 class="text-4xl font-bold text-center mb-4">高级图片格式转换器</h1>
+        <p class="text-center mb-8 text-gray-600">轻松转换您的图片格式，支持JPEG、PNG、WebP、GIF和BMP</p>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div>
+                <div id="fileUpload" class="border-2 border-dashed border-blue-500 rounded-lg p-8 text-center cursor-pointer transition-colors duration-300 hover:bg-gray-50 h-64 flex flex-col justify-center items-center bg-gray-100">
+                    <svg class="w-12 h-12 text-blue-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                    <p class="text-gray-600">点击或拖拽图片到此处</p>
+                    <input type="file" id="fileInput" accept="image/*" class="hidden">
+                </div>
+                <div id="inputInfo" class="mt-6 bg-gray-50 border-l-4 border-blue-500 p-4 rounded hidden">
+                    <p id="inputFileName" class="mb-2"><strong>文件名:</strong> <span class="text-gray-600"></span></p>
+                    <p id="inputFileSize" class="mb-2"><strong>文件大小:</strong> <span class="text-gray-600"></span></p>
+                    <p id="inputFileDimensions"><strong>尺寸:</strong> <span class="text-gray-600"></span></p>
+                </div>
+                <div id="inputPreview" class="mt-6 text-center hidden">
+                    <img id="inputImage" class="max-w-full max-h-64 object-contain rounded-lg mx-auto shadow" alt="输入图片预览">
+                </div>
+            </div>
+            <div>
+                <div class="mb-6">
+                    <label for="formatSelect" class="block text-sm font-medium text-gray-700 mb-2">选择目标格式</label>
+                    <select id="formatSelect" class="block w-full bg-white border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="jpeg">JPEG</option>
+                        <option value="png">PNG</option>
+                        <option value="webp">WebP</option>
+                        <option value="gif">GIF</option>
+                        <option value="bmp">BMP</option>
+                    </select>
+                </div>
+                <button id="convertButton" class="w-full bg-blue-500 text-white py-3 px-4 rounded-md hover:bg-blue-600 transition-colors duration-300 font-semibold">转换</button>
+                <div id="conversionProgress" class="mt-6 hidden">
+                    <div class="bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-blue-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div id="outputInfo" class="mt-6 bg-gray-50 border-l-4 border-blue-500 p-4 rounded hidden">
+                    <p id="outputFileSize" class="mb-2"><strong>文件大小:</strong> <span class="text-gray-600"></span></p>
+                    <p id="outputFileDimensions"><strong>尺寸:</strong> <span class="text-gray-600"></span></p>
+                </div>
+                <div id="outputPreview" class="mt-6 text-center hidden">
+                    <img id="outputImage" class="max-w-full max-h-64 object-contain rounded-lg mx-auto shadow" alt="输出图片预览">
+                    <a id="downloadLink" class="inline-block mt-6 bg-blue-500 text-white py-2 px-6 rounded-md hover:bg-blue-600 transition-colors duration-300 font-semibold" download>下载转换后图片</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileUpload = document.getElementById('fileUpload');
+        const fileInput = document.getElementById('fileInput');
+        const formatSelect = document.getElementById('formatSelect');
+        const convertButton = document.getElementById('convertButton');
+        const inputInfo = document.getElementById('inputInfo');
+        const inputFileName = document.getElementById('inputFileName').querySelector('span');
+        const inputFileSize = document.getElementById('inputFileSize').querySelector('span');
+        const inputFileDimensions = document.getElementById('inputFileDimensions').querySelector('span');
+        const inputPreview = document.getElementById('inputPreview');
+        const inputImage = document.getElementById('inputImage');
+        const conversionProgress = document.getElementById('conversionProgress');
+        const outputInfo = document.getElementById('outputInfo');
+        const outputFileSize = document.getElementById('outputFileSize').querySelector('span');
+        const outputFileDimensions = document.getElementById('outputFileDimensions').querySelector('span');
+        const outputPreview = document.getElementById('outputPreview');
+        const outputImage = document.getElementById('outputImage');
+        const downloadLink = document.getElementById('downloadLink');
+
+        fileUpload.addEventListener('click', () => fileInput.click());
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            fileUpload.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileUpload.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileUpload.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            fileUpload.classList.add('bg-gray-200');
+        }
+
+        function unhighlight() {
+            fileUpload.classList.remove('bg-gray-200');
+        }
+
+        fileUpload.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length) handleFile(files[0]);
+        }
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        async function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('请选择一个有效的图片文件。');
+                return;
+            }
+
+            inputFileName.textContent = file.name;
+            inputFileSize.textContent = formatFileSize(file.size);
+            inputInfo.classList.remove('hidden');
+
+            const img = new Image();
+            img.onload = () => {
+                inputFileDimensions.textContent = `${img.width} x ${img.height}`;
+                inputImage.src = img.src;
+                inputPreview.classList.remove('hidden');
+            };
+            img.src = URL.createObjectURL(file);
+        }
+
+        convertButton.addEventListener('click', async () => {
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('请先选择一个文件。');
+                return;
+            }
+
+            conversionProgress.classList.remove('hidden');
+            conversionProgress.querySelector('div').style.width = '0%';
+
+            try {
+                const result = await convertImage(file, formatSelect.value);
+                displayResult(result);
+            } catch (error) {
+                alert(`转换失败: ${error.message}`);
+            } finally {
+                conversionProgress.classList.add('hidden');
+            }
+        });
+
+        async function convertImage(file, format) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        
+                        canvas.toBlob(blob => {
+                            if (blob) {
+                                resolve({
+                                    blob: blob,
+                                    width: img.width,
+                                    height: img.height
+                                });
+                            } else {
+                                reject(new Error('转换失败'));
+                            }
+                        }, `image/${format}`, 0.9);
+                    };
+                    img.onerror = () => reject(new Error('图片加载失败'));
+                    img.src = e.target.result;
+                };
+                reader.onerror = () => reject(new Error('文件读取失败'));
+                reader.onprogress = (e) => {
+                    if (e.lengthComputable) {
+                        const progress = (e.loaded / e.total) * 100;
+                        conversionProgress.querySelector('div').style.width = `${progress}%`;
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function displayResult(result) {
+            const url = URL.createObjectURL(result.blob);
+            outputImage.src = url;
+            outputPreview.classList.remove('hidden');
+
+            outputFileSize.textContent = formatFileSize(result.blob.size);
+            outputFileDimensions.textContent = `${result.width} x ${result.height}`;
+            outputInfo.classList.remove('hidden');
+
+            downloadLink.href = url;
+            downloadLink.download = `converted.${formatSelect.value}`;
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+    </script>
+</body>
+</html>

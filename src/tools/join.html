@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片拼接工具</title>
+  <link rel="stylesheet" crossorigin href="../../assets/style-DaBjXPXN.css">
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="container max-w-4xl w-full bg-white rounded-xl shadow-lg p-8">
+        <header class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">图片拼接工具</h1>
+            <p class="text-gray-600 mt-2">轻松拼接多张图片，支持网格、水平和垂直拼接方式</p>
+        </header>
+        <main class="space-y-6">
+            <div class="bg-gray-50 rounded-lg p-6">
+                <div id="joinUpload" class="border-2 border-dashed border-[#3273DC] rounded-lg p-8 text-center cursor-pointer hover:bg-gray-100 transition-colors duration-300">
+                    <svg class="w-16 h-16 mx-auto text-[#3273DC] mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <p class="text-lg text-gray-700">点击或拖拽多张图片到这里上传</p>
+                    <input type="file" accept="image/*" multiple hidden>
+                </div>
+                <div class="mt-6 flex justify-between items-center">
+                    <div class="flex items-center">
+                        <label for="joinType" class="text-gray-700 mr-2">拼接方式：</label>
+                        <select id="joinType" class="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#3273DC]">
+                            <option value="grid">网格</option>
+                            <option value="horizontal">水平</option>
+                            <option value="vertical">垂直</option>
+                        </select>
+                    </div>
+                    <button id="joinButton" class="bg-[#3273DC] hover:bg-[#2861b8] text-white font-medium py-2 px-6 rounded-md transition-colors duration-300">拼接图片</button>
+                </div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 text-center">拼接预览</h2>
+                <div id="previewContent" class="flex justify-center items-center min-h-[300px] bg-white rounded-lg border border-gray-200"></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const previewContent = document.getElementById('previewContent');
+        const joinUpload = document.getElementById('joinUpload');
+        const joinButton = document.getElementById('joinButton');
+        const joinTypeSelect = document.getElementById('joinType');
+
+        let joinImages = [];
+
+        joinUpload.addEventListener('click', () => joinUpload.querySelector('input').click());
+        joinUpload.querySelector('input').addEventListener('change', handleImagesUpload);
+        joinButton.addEventListener('click', joinImagesAndDownload);
+        joinTypeSelect.addEventListener('change', updateJoinPreview);
+
+        function handleImagesUpload(e) {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+
+            showLoading();
+
+            Promise.all(files.map(file => createImage(URL.createObjectURL(file))))
+                .then(images => {
+                    joinImages = images;
+                    return preprocessJoinImages();
+                })
+                .then(() => {
+                    updateJoinPreview();
+                    hideLoading();
+                })
+                .catch(error => {
+                    console.error('Error loading images:', error);
+                    alert('图片加载失败，请重试。');
+                    hideLoading();
+                });
+        }
+
+        function createImage(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = src;
+            });
+        }
+
+        function preprocessJoinImages() {
+            if (joinImages.length === 0) return Promise.resolve();
+
+            const maxWidth = Math.max(...joinImages.map(img => img.width));
+            const maxHeight = Math.max(...joinImages.map(img => img.height));
+
+            return Promise.all(joinImages.map(img => createImage(resizeImage(img, maxWidth, maxHeight))));
+        }
+
+        function resizeImage(img, maxWidth, maxHeight) {
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            const aspectRatio = img.width / img.height;
+
+            let newWidth, newHeight;
+
+            if (aspectRatio > maxWidth / maxHeight) {
+                newWidth = maxWidth;
+                newHeight = newWidth / aspectRatio;
+            } else {
+                newHeight = maxHeight;
+                newWidth = newHeight * aspectRatio;
+            }
+
+            tempCanvas.width = maxWidth;
+            tempCanvas.height = maxHeight;
+
+            const x = (maxWidth - newWidth) / 2;
+            const y = (maxHeight - newHeight) / 2;
+
+            tempCtx.drawImage(img, x, y, newWidth, newHeight);
+
+            return tempCanvas.toDataURL();
+        }
+
+        function updateJoinPreview() {
+            if (joinImages.length === 0) return;
+
+            showLoading();
+
+            const joinType = joinTypeSelect.value;
+            const { width, height } = calculateJoinDimensions(joinType);
+
+            canvas.width = width;
+            canvas.height = height;
+
+            drawJoinedImage(joinType);
+
+            const img = document.createElement('img');
+            img.src = canvas.toDataURL();
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+
+            hideLoading();
+            previewContent.innerHTML = '';
+            previewContent.appendChild(img);
+        }
+
+        function calculateJoinDimensions(joinType) {
+            const imgWidth = joinImages[0].width;
+            const imgHeight = joinImages[0].height;
+
+            switch (joinType) {
+                case 'horizontal':
+                    return { width: imgWidth * joinImages.length, height: imgHeight };
+                case 'vertical':
+                    return { width: imgWidth, height: imgHeight * joinImages.length };
+                case 'grid':
+                default:
+                    const cols = Math.ceil(Math.sqrt(joinImages.length));
+                    const rows = Math.ceil(joinImages.length / cols);
+                    return { width: imgWidth * cols, height: imgHeight * rows };
+            }
+        }
+
+        function drawJoinedImage(joinType) {
+            switch (joinType) {
+                case 'horizontal':
+                    joinImages.forEach((img, index) => {
+                        ctx.drawImage(img, index * img.width, 0);
+                    });
+                    break;
+                case 'vertical':
+                    joinImages.forEach((img, index) => {
+                        ctx.drawImage(img, 0, index * img.height);
+                    });
+                    break;
+                case 'grid':
+                default:
+                    const cols = Math.ceil(Math.sqrt(joinImages.length));
+                    joinImages.forEach((img, index) => {
+                        const x = (index % cols) * img.width;
+                        const y = Math.floor(index / cols) * img.height;
+                        ctx.drawImage(img, x, y);
+                    });
+                    break;
+            }
+        }
+
+        function joinImagesAndDownload() {
+            if (joinImages.length === 0) {
+                alert('请先上传图片。');
+                return;
+            }
+
+            const joinType = joinTypeSelect.value;
+            const { width, height } = calculateJoinDimensions(joinType);
+
+            canvas.width = width;
+            canvas.height = height;
+
+            drawJoinedImage(joinType);
+
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png');
+            link.download = 'joined_image.png';
+            link.click();
+        }
+
+        function showLoading() {
+            previewContent.innerHTML = '<p class="text-gray-500 text-center">处理中...</p>';
+        }
+
+        function hideLoading() {
+            const loading = previewContent.querySelector('p');
+            if (loading) {
+                loading.remove();
+            }
+        }
+    </script>
+</body>
+</html>

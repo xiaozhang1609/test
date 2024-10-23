@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户名和密码生成器</title>
+  <link rel="stylesheet" crossorigin href="../../assets/style-DaBjXPXN.css">
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="container max-w-2xl mx-auto px-4 py-4">
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-4">
+                <h1 class="text-2xl font-bold text-white text-center">用户名和密码生成器</h1>
+                <p class="text-blue-100 text-center mt-1 text-sm">快速生成安全的用户名和密码</p>
+            </div>
+            
+            <div class="p-4 space-y-4">
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1" for="usernameOutput">用户名</label>
+                        <div class="flex rounded-md shadow-sm space-x-2">
+                            <input class="flex-grow px-3 py-2 rounded-l-md border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-gray-50 text-base" type="text" id="usernameOutput" readonly>
+                            <button class="bg-indigo-500 text-white px-3 py-2 rounded-md transition duration-300 ease-in-out hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 text-sm" id="copyUsername">复制</button>
+                            <button class="bg-blue-500 text-white px-3 py-2 rounded-r-md transition duration-300 ease-in-out hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 text-sm" id="generateUsername">生成</button>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1" for="passwordOutput">密码</label>
+                        <div class="flex rounded-md shadow-sm space-x-2">
+                            <input class="flex-grow px-3 py-2 rounded-l-md border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 bg-gray-50 text-base" type="text" id="passwordOutput" readonly>
+                            <button class="bg-indigo-500 text-white px-3 py-2 rounded-md transition duration-300 ease-in-out hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 text-sm" id="copyPassword">复制</button>
+                            <button class="bg-blue-500 text-white px-3 py-2 rounded-r-md transition duration-300 ease-in-out hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 text-sm" id="generatePassword">生成</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 p-3 rounded-lg shadow-inner">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-2">生成选项</h2>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1" for="usernameLength">用户名长度</label>
+                            <input class="w-full px-3 py-1 rounded-md border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm" type="number" id="usernameLength" value="8" min="4" max="20">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1" for="passwordLength">密码长度</label>
+                            <input class="w-full px-3 py-1 rounded-md border-gray-300 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-sm" type="number" id="passwordLength" value="12" min="8" max="32">
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">字符类型</label>
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" id="includeLowercase" checked class="rounded border-gray-300 text-indigo-600 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <span class="ml-2">小写字母</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" id="includeUppercase" checked class="rounded border-gray-300 text-indigo-600 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <span class="ml-2">大写字母</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" id="includeNumbers" checked class="rounded border-gray-300 text-indigo-600 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <span class="ml-2">数字</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" id="includeSymbols" class="rounded border-gray-300 text-indigo-600 focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <span class="ml-2">符号</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2 px-4 rounded-md hover:from-blue-600 hover:to-indigo-700 transition duration-300 ease-in-out text-base font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" id="generateBoth">
+                    一键生成用户名和密码
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const numbers = '0123456789';
+    const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+    function generateRandomString(length, charset) {
+        return Array.from({length}, () => charset[Math.floor(Math.random() * charset.length)]).join('');
+    }
+
+    function showNotification(message, element) {
+        const notification = document.createElement('div');
+        notification.className = 'notification bg-green-500 text-white text-sm py-1 px-2 rounded absolute z-10';
+        notification.textContent = message;
+        
+        const rect = element.getBoundingClientRect();
+        notification.style.top = `${rect.bottom + window.scrollY + 5}px`;
+        notification.style.left = `${rect.left + window.scrollX}px`;
+        
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 2000);
+    }
+
+    function generateString(length, isUsername = false) {
+        let charset = '';
+        if (isUsername) {
+            charset = [
+                document.getElementById('includeLowercase').checked ? lowercase : '',
+                document.getElementById('includeUppercase').checked ? uppercase : '',
+                document.getElementById('includeNumbers').checked ? numbers : ''
+            ].join('');
+        } else {
+            charset = [
+                document.getElementById('includeLowercase').checked ? lowercase : '',
+                document.getElementById('includeUppercase').checked ? uppercase : '',
+                document.getElementById('includeNumbers').checked ? numbers : '',
+                document.getElementById('includeSymbols').checked ? symbols : ''
+            ].join('');
+        }
+
+        if (!charset) {
+            alert('请至少选择一种字符类型');
+            return '';
+        }
+
+        return generateRandomString(length, charset);
+    }
+
+    function generateUsername() {
+        const username = generateString(+document.getElementById('usernameLength').value, true);
+        if (username) {
+            document.getElementById('usernameOutput').value = username;
+        }
+    }
+
+    function generatePassword() {
+        const password = generateString(+document.getElementById('passwordLength').value);
+        if (password) {
+            document.getElementById('passwordOutput').value = password;
+        }
+    }
+
+    function copyToClipboard(text, element) {
+        if (!text) {
+            showNotification('请先生成内容', element);
+            return;
+        }
+        navigator.clipboard.writeText(text)
+            .then(() => showNotification('复制成功', element))
+            .catch(() => showNotification('复制失败', element));
+    }
+
+    function generateBoth() {
+        generateUsername();
+        generatePassword();
+    }
+
+    document.getElementById('generateBoth').addEventListener('click', generateBoth);
+
+    document.getElementById('generateUsername').addEventListener('click', generateUsername);
+    document.getElementById('generatePassword').addEventListener('click', generatePassword);
+
+    document.getElementById('copyUsername').addEventListener('click', () => copyToClipboard(document.getElementById('usernameOutput').value, document.getElementById('copyUsername')));
+    document.getElementById('copyPassword').addEventListener('click', () => copyToClipboard(document.getElementById('passwordOutput').value, document.getElementById('copyPassword')));
+
+    // 页面加载完成后自动生成用户名和密码
+    document.addEventListener('DOMContentLoaded', generateBoth);
+    </script>
+</body>
+</html>

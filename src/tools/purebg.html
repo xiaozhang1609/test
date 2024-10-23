@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>纯色背景图片生成器</title>
+  <link rel="stylesheet" crossorigin href="../../assets/style-DaBjXPXN.css">
+</head>
+<body class="h-full m-0 p-0 font-sans text-gray-800 bg-gray-100 flex flex-col items-center justify-center">
+    <div id="preview" class="fixed inset-0 transition-colors duration-300"></div>
+    <div class="relative bg-white bg-opacity-90 p-8 rounded-lg shadow-lg w-full max-w-md">
+        <header class="text-center mb-4">
+            <h1 class="text-3xl font-bold text-[#3273DC]">纯色背景图片生成器</h1>
+            <p class="text-gray-600 mt-2">轻松创建自定义尺寸和颜色的背景图片</p>
+        </header>
+        <main class="space-y-6">
+            <section>
+                <h2 class="text-lg font-semibold text-[#3273DC] mb-2">选择颜色</h2>
+                <div class="flex flex-col space-y-3">
+                    <input type="color" id="colorPicker" value="#3273DC" class="w-full h-10 rounded-full cursor-pointer">
+                    <div id="presetColors" class="flex flex-wrap justify-between gap-2"></div>
+                </div>
+            </section>
+            <section>
+                <h2 class="text-lg font-semibold text-[#3273DC] mb-2">选择分辨率</h2>
+                <select id="resolutionSelect" class="w-full p-2 border border-gray-300 rounded-md bg-white">
+                    <option value="1920x1080">1920x1080 (16:9)</option>
+                    <option value="1280x720">1280x720 (16:9)</option>
+                    <option value="3840x2160">3840x2160 (4K)</option>
+                    <option value="1080x1920">1080x1920 (9:16)</option>
+                    <option value="custom">自定义</option>
+                </select>
+                <div id="customResolution" class="hidden mt-2 space-x-2">
+                    <input type="number" id="customWidth" placeholder="宽度" class="w-1/2 p-2 border border-gray-300 rounded-md">
+                    <input type="number" id="customHeight" placeholder="高度" class="w-1/2 p-2 border border-gray-300 rounded-md">
+                </div>
+            </section>
+            <section>
+                <h2 class="text-lg font-semibold text-[#3273DC] mb-2">选择图像格式</h2>
+                <div class="flex space-x-4">
+                    <label class="flex items-center">
+                        <input type="radio" name="format" value="png" checked class="mr-2">
+                        <span>PNG</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="radio" name="format" value="jpeg" class="mr-2">
+                        <span>JPEG</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="radio" name="format" value="webp" class="mr-2">
+                        <span>WebP</span>
+                    </label>
+                </div>
+            </section>
+            <button id="generateButton" class="w-full py-2 px-4 bg-[#3273DC] text-white font-semibold rounded-md hover:bg-[#2860B8] transition-colors duration-300">
+                生成并下载图片
+            </button>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const colorPicker = document.getElementById('colorPicker');
+            const resolutionSelect = document.getElementById('resolutionSelect');
+            const customResolution = document.getElementById('customResolution');
+            const customWidth = document.getElementById('customWidth');
+            const customHeight = document.getElementById('customHeight');
+            const generateButton = document.getElementById('generateButton');
+            const preview = document.getElementById('preview');
+            const presetColors = document.getElementById('presetColors');
+
+            const presetColorValues = ['#3273DC', '#2ECC71', '#E74C3C', '#F39C12', '#9B59B6', '#1ABC9C', '#34495E', '#7F8C8D'];
+
+            presetColorValues.forEach(color => {
+                const button = document.createElement('button');
+                button.className = 'w-8 h-8 rounded-full cursor-pointer transition-transform duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#3273DC]';
+                button.style.backgroundColor = color;
+                button.setAttribute('data-color', color);
+                presetColors.appendChild(button);
+            });
+
+            colorPicker.addEventListener('input', updatePreview);
+            presetColors.addEventListener('click', (e) => {
+                if (e.target.hasAttribute('data-color')) {
+                    colorPicker.value = e.target.getAttribute('data-color');
+                    updatePreview();
+                }
+            });
+
+            resolutionSelect.addEventListener('change', () => {
+                customResolution.classList.toggle('hidden', resolutionSelect.value !== 'custom');
+            });
+
+            generateButton.addEventListener('click', generateImage);
+
+            function updatePreview() {
+                preview.style.backgroundColor = colorPicker.value;
+            }
+
+            function generateImage() {
+                const color = colorPicker.value;
+                const format = document.querySelector('input[name="format"]:checked').value;
+                let width, height;
+
+                if (resolutionSelect.value === 'custom') {
+                    width = parseInt(customWidth.value, 10);
+                    height = parseInt(customHeight.value, 10);
+                } else {
+                    [width, height] = resolutionSelect.value.split('x').map(Number);
+                }
+
+                if (!width || !height) {
+                    alert('请输入有效的宽度和高度。');
+                    return;
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = color;
+                ctx.fillRect(0, 0, width, height);
+
+                canvas.toBlob(blob => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `background_${width}x${height}.${format}`;
+                    link.click();
+                }, `image/${format}`);
+            }
+
+            updatePreview();
+        });
+    </script>
+</body>
+</html>
