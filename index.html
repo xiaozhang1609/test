@@ -1,240 +1,62 @@
 <!DOCTYPE html>
-<html lang="zh-CN" class="h-full bg-gray-100">
+<html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>小章工具箱</title>
-    <style>
-        :root {
-            --primary-color: #3B82F6;
-            --primary-dark: #2563EB;
-            --text-color: #1F2937;
-            --bg-color: #F3F4F6;
-            --sidebar-width: 300px;
-            --transition-speed: 0.3s;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
-            color: var(--text-color);
-            background-color: var(--bg-color);
-        }
-        .gradient-bg {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-        }
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .hide-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        .nav-group {
-            border-bottom: 1px solid #e5e7eb;
-            padding-bottom: 0.75rem;
-            margin-bottom: 0.75rem;
-        }
-        .nav-group:last-child {
-            border-bottom: none;
-        }
-        .nav-group-title {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            padding: 0.75rem 1.25rem;
-        }
-        .nav-item {
-            font-size: 0.9375rem;
-            color: #4B5563;
-            padding: 0.875rem 1.25rem;
-            border-radius: 0.5rem;
-            transition: all var(--transition-speed) ease-in-out;
-            display: flex;
-            align-items: center;
-        }
-        .nav-item:hover, .nav-item.active {
-            background-color: #EFF6FF;
-            color: var(--primary-color);
-        }
-        .nav-item.active {
-            font-weight: 600;
-        }
-        .nav-item-icon {
-            margin-right: 0.75rem;
-            width: 1.5rem;
-            height: 1.5rem;
-        }
-        .sidebar-toggle {
-            position: fixed;
-            top: 1.25rem;
-            left: 1.25rem;
-            z-index: 40;
-            padding: 0.625rem;
-            background-color: white;
-            color: var(--primary-color);
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            transition: all var(--transition-speed) ease-in-out;
-        }
-        .sidebar-toggle:hover {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        @media (min-width: 1024px) {
-            .sidebar-toggle {
-                display: none;
-            }
-        }
-        .fix-computer-container {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            z-index: 50;
-        }
-        #fixComputerBtn {
-            background-color: var(--primary-color);
-            color: white;
-            font-weight: bold;
-            padding: 0.5rem 1rem;
-            border-radius: 0.375rem;
-            transition: background-color 0.3s ease;
-        }
-        #fixComputerBtn:hover {
-            background-color: var(--primary-dark);
-        }
-        .copy-button {
-            background-color: transparent;
-            color: var(--primary-color);
-            font-size: 0.75rem;
-            padding: 0.25rem;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-left: 0.25rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .copy-button:hover {
-            color: var(--primary-dark);
-        }
-        .copy-icon {
-            width: 0.875rem;
-            height: 0.875rem;
-        }
-        .copy-tooltip {
-            position: absolute;
-            background-color: var(--primary-color);
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-        }
-        .copy-tooltip.show {
-            opacity: 1;
-        }
-    </style>
-  <script type="module" crossorigin src="/assets/main-DLV5SxJl.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/style-BPMbFHd8.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Test - Llama 3</title>
 </head>
-<body class="h-full p-4 sm:p-6">
-    <div class="flex h-[calc(100vh-2rem)] sm:h-[calc(100vh-3rem)] gap-6">
-        <!-- 侧边栏容器 -->
-        <div class="w-[var(--sidebar-width)] hidden lg:block">
-            <nav id="sidebar" class="bg-white shadow-lg flex flex-col h-full rounded-xl overflow-hidden">
-                <div class="gradient-bg text-white h-24 flex items-center justify-center">
-                    <a href="/" class="text-2xl font-bold cursor-pointer transition-all hover:text-3xl">
-                        小章工具箱
-                    </a>
-                </div>
-                <div class="flex-grow overflow-y-auto hide-scrollbar">
-                    <ul id="toolList" class="space-y-1 p-4">
-                        <!-- 工具列表将通过 JavaScript 动态填充 -->
-                    </ul>
-                </div>
-                <!-- 修改: 侧边栏底部联系信息 -->
-                <div class="p-5 bg-gray-50 text-sm border-t border-gray-200">
-                    <h4 class="font-semibold mb-2 text-gray-700">找我修电脑</h4>
-                    <p class="relative mb-2">
-                        微信：xiaozhang1609
-                        <button class="copy-button ml-2" onclick="copyToClipboard('xiaozhang1609', this)" aria-label="复制微信号">
-                            <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                            </svg>
-                        </button>
-                        <span class="copy-tooltip">已复制</span>
-                    </p>
-                    <a href="/fixpc.html" class="text-blue-600 hover:text-blue-800 font-medium">查看更多服务与价格 →</a>
-                </div>
-            </nav>
-        </div>
+<body>
+  <h1>Llama 3 Model API Test</h1>
+  <button id="runButton">Run Model</button>
+  <pre id="result"></pre>
 
-        <!-- 主内容区域容器 -->
-        <div class="flex-1 bg-white rounded-xl shadow-lg overflow-hidden">
-            <main class="h-full p-6">
-                <iframe id="toolFrame" class="w-full h-full border-none rounded-lg" src="about:blank" title="选中的工具内容" loading="lazy"></iframe>
-            </main>
-        </div>
-    </div>
+  <script>
+    const API_TOKEN = "s7GITCnc1Xq47BQdqLtHTJPi30tpNB1xu7W5E5y4"; // 替换为你的 API 令牌
+    const MODEL_NAME = "@cf/meta/llama-3-8b-instruct";
 
-    <!-- 移动端侧边栏 -->
-    <div id="mobileSidebar" class="fixed inset-0 bg-gray-600 bg-opacity-75 z-50 lg:hidden" style="display: none;">
-        <div class="fixed inset-y-0 left-0 w-[var(--sidebar-width)] bg-white shadow-2xl">
-            <nav class="flex flex-col h-full">
-                <div class="gradient-bg text-white h-20 flex items-center justify-between px-6">
-                    <a href="/" class="text-2xl font-bold">小章工具箱</a>
-                    <button id="closeMobileSidebar" class="text-white focus:outline-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-                <div class="flex-grow overflow-y-auto hide-scrollbar">
-                    <ul id="mobileToolList" class="space-y-1 p-4">
-                        <!-- 移动端工具列表将通过 JavaScript 动态填充 -->
-                    </ul>
-                </div>
-                <!-- 修改: 移动端侧边栏底部联系信息 -->
-                <div class="p-4 bg-gray-100 text-sm">
-                    <h4 class="font-semibold mb-2">联系我们</h4>
-                    <p>
-                        微信：xiaozhang1609
-                        <button class="copy-button" onclick="copyToClipboard('xiaozhang1609')" aria-label="复制微信号">
-                            <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                            </svg>
-                        </button>
-                    </p>
-                    <p><a href="/fixpc.html" class="text-blue-600 hover:text-blue-800">查看更多服务与价格</a></p>
-                </div>
-            </nav>
-        </div>
-    </div>
-
-    <!-- 移动端侧边栏切换按钮 -->
-    <button id="openMobileSidebar" class="sidebar-toggle" aria-label="打开侧边栏">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-    </button>
-
-    <script>
-        function copyToClipboard(text, button) {
-            navigator.clipboard.writeText(text).then(() => {
-                const tooltip = button.nextElementSibling;
-                tooltip.classList.add('show');
-                setTimeout(() => {
-                    tooltip.classList.remove('show');
-                }, 2000);
-            }).catch(err => {
-                console.error('无法复制文本: ', err);
-            });
+    async function run(model, input) {
+      const response = await fetch(
+        `https://api.cloudflare.com/client/v4/accounts/36d717702673acf6f38d12be52ce9e3e/ai/run/${model}`,
+        {
+          headers: {
+            Authorization: `Bearer ${API_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+          method: "POST",
+          body: JSON.stringify(input),
         }
-    </script>
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(`API Error: ${error.message}`);
+      }
+
+      const result = await response.json();
+      return result;
+    }
+
+    document.getElementById("runButton").addEventListener("click", () => {
+      run(MODEL_NAME, {
+        messages: [
+          {
+            role: "system",
+            content: "You are a friendly assistant that helps write stories",
+          },
+          {
+            role: "user",
+            content:
+              "Write a short story about a llama that goes on a journey to find an orange cloud.",
+          },
+        ],
+      })
+        .then((response) => {
+          document.getElementById("result").textContent = JSON.stringify(response, null, 2);
+        })
+        .catch((error) => {
+          document.getElementById("result").textContent = `Error: ${error.message}`;
+        });
+    });
+  </script>
 </body>
 </html>
